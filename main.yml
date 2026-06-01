@@ -1,0 +1,29 @@
+name: Build on Windows
+on: push
+
+jobs:
+  run-selected-unittests:
+    runs-on: windows-latest
+    env:
+      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+    name: Auto Build NetworkSpeed
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        id: checkout_code
+            
+      - name: Setup MSBuild and add to PATH
+        uses: microsoft/setup-msbuild@v2
+        id: setup_msbuild
+              
+      - name: Run MSBuild
+        id: run_msbuild
+        run: |
+          msbuild .\NetworkSpeed.sln  /t:clean /p:Configuration=Debug
+          nuget restore .\NetworkSpeed.sln
+          msbuild .\NetworkSpeed.sln  /t:build /p:Configuration=Debug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NetworkSpeed
+          path: .\NetworkSpeed\bin\Debug\
